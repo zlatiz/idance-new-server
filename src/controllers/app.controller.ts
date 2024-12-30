@@ -1,12 +1,19 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from '../services/app.service';
+import { Body, Controller, Post } from '@nestjs/common';
+import { AcademiesService } from '../services/app.service';
+import { IAcademyModel } from '@zlatiz/idance-types';
+import { GenericServerException } from './../error-handling/server-errors/generic.exception';
 
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+@Controller('/v1/academies')
+export class AcademiesController {
+  constructor(private readonly academiesService: AcademiesService) {}
+
+  @Post()
+  async createAcademy(@Body() body: IAcademyModel) {
+    try {
+      await this.academiesService.createAcademy(body);
+    } catch (error) {
+      throw new GenericServerException(error.message);
+    }
   }
 }
