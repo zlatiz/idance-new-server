@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
 import { AcademiesService } from '../services/app.service';
 import { IAcademyModel } from '@zlatiz/idance-types';
 import { GenericServerException } from './../error-handling/server-errors/generic.exception';
@@ -12,6 +12,15 @@ export class AcademiesController {
   async createAcademy(@Body() body: IAcademyModel) {
     try {
       await this.academiesService.createAcademy(body);
+    } catch (error) {
+      throw new GenericServerException(error.message);
+    }
+  }
+
+  @Patch('/:slug')
+  async updateAcademy(@Param('slug') slug: string, @Body() body: Partial<IAcademyModel>) {
+    try {
+      await this.academiesService.updateAcademy(slug, body);
     } catch (error) {
       throw new GenericServerException(error.message);
     }

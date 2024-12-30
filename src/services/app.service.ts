@@ -3,6 +3,7 @@ import { DatabaseService } from './db/database.service';
 import { IAcademyModel } from '@zlatiz/idance-types';
 import { CollectionNamesEnum } from './db/data/collection-names.enum';
 import { DatabaseNamesEnum } from './db/data/database-names.enum';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class AcademiesService {
@@ -17,7 +18,41 @@ export class AcademiesService {
       CollectionNamesEnum.ACADEMIES
     );
     
-    await collection.insertOne(academyWithSlug);
+    await collection.insertOne({...academyWithSlug, _id: new ObjectId()});
+  }
+
+  async updateAcademy(slug: string, academyUpdate: Partial<IAcademyModel>) {
+    const collection = await this.databaseService.getCollection(
+      DatabaseNamesEnum.ACADEMIES,
+      CollectionNamesEnum.ACADEMIES
+    );
+
+    const academyStored = await this.getAcademyBySlug(slug);
+    const result = await collection.updateOne(
+      { _id: new ObjectId(academyStored?._id)},
+      { $set: academyUpdate }
+    );
+
+    if (result.matchedCount === 0) {
+      throw new Error('Academy not found');
+    }
+
+    return result.modifiedCount > 0;
+  }
+
+  async getAcademyBySlug(slug: string): Promise<IAcademyModel | null> {
+    const collection = await this.databaseService.getCollection(
+      DatabaseNamesEnum.ACADEMIES,
+      CollectionNamesEnum.ACADEMIES
+    );
+
+    const academy = await collection.findOne({ slug });
+    
+    if (!academy) {
+      return null;
+    }
+    
+    return { ...academy, _id: academy._id.toString() } as IAcademyModel;
   }
 }
 
