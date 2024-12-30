@@ -21,6 +21,14 @@ export class AcademiesService {
     await collection.insertOne({...academyWithSlug, _id: new ObjectId()});
   }
 
+  async getAcademy(slug: string): Promise<IAcademyModel | null> {
+    const academy = await this.getAcademyBySlug(slug);
+    if (!academy) {
+      throw new Error('Academy not found');
+    }
+    return academy;
+  }
+
   async updateAcademy(slug: string, academyUpdate: Partial<IAcademyModel>) {
     const collection = await this.databaseService.getCollection(
       DatabaseNamesEnum.ACADEMIES,
